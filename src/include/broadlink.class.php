@@ -1,12 +1,25 @@
 <?
 date_default_timezone_set("Asia/Taipei");
 
+require_once __DIR__ . "/../phpcrypt/phpCrypt.php";
+use PHP_Crypt\PHP_Crypt as PHP_Crypt;
+
 function aes128_cbc_encrypt($key, $data, $iv) {
-  return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
+
+  $crypt = new PHP_Crypt($key, PHP_Crypt::CIPHER_AES_128, PHP_Crypt::MODE_CBC);
+  $crypt->IV($iv);
+  return $crypt->encrypt($data);
+
+  //return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
 }
 
 function aes128_cbc_decrypt($key, $data, $iv) {
-  return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
+  
+  $crypt = new PHP_Crypt($key, PHP_Crypt::CIPHER_AES_128, PHP_Crypt::MODE_CBC);
+  $crypt->IV($iv);
+  return $crypt->decrypt($data);
+
+  //return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, $iv);
 }
 
 class Broadlink{
@@ -372,7 +385,7 @@ class Broadlink{
 			$host_array = array_slice($responsepacket, 0x36, 4);
 			$mac = array_slice($responsepacket, 0x3a, 6);
 
-			foreach ( array_reverse($host_array) as $ip ) {
+			foreach ( $host_array as $ip ) {
  				$host .= $ip . ".";
 			}
 
@@ -443,6 +456,17 @@ class Broadlink{
 
 	    $aes = $this->byte2array(aes128_cbc_encrypt($this->key(), $this->byte($payload), $this->iv()));
 
+        /*$packetHex = "";
+        foreach (array_reverse($payload) as $value) {
+            $packetHex = sprintf("%02x", $value) . ':' . $packetHex;
+        }
+        var_dump($packetHex);
+        $packetHex = "";
+        foreach (array_reverse($aes) as $value) {
+            $packetHex = sprintf("%02x", $value) . ':' . $packetHex;
+        }
+        var_dump($packetHex);
+        */
 	    $packet[0x34] = $checksum & 0xff;
 	    $packet[0x35] = $checksum >> 8;
 
@@ -463,11 +487,25 @@ class Broadlink{
 
 
 	    $from = '';
-	    socket_sendto($cs, $this->byte($packet), sizeof($packet), 0, $this->host, $this->port);
-	    socket_set_option($cs, SOL_SOCKET, SO_RCVTIMEO, array('sec'=>$this->timeout, 'usec'=>0));
+    
+        /*$packetHex = "";	    
+        foreach (array_reverse($packet) as $value) {
+            $packetHex = sprintf("%02x", $value) . ':' . $packetHex;
+        }
+        var_dump($packetHex);
+        */
+        $ret = false;
+        $i = 5;
 
-	    $ret = socket_recvfrom($cs, $response, 1024, 0, $from, $port);
+        while($ret === false and $i > 0)
+        {
+           socket_sendto($cs, self::byte($packet), sizeof($packet), 0, $this->host, $this->port);
+	       socket_set_option($cs, SOL_SOCKET, SO_RCVTIMEO, array('sec'=>$this->timeout, 'usec'=>0));
 
+	       $ret = socket_recvfrom($cs, $response, 1024, 0, $from, $port);
+           sleep(1);
+           $i--;
+        }
 	    if($cs){
 	    	socket_close($cs);
 	    }
