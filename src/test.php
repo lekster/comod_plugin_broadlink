@@ -1,24 +1,17 @@
 <?php
 
+define("PROJ_DIR", "/home/asmirnov/workspace/pbr-wifc-asm-test/");
 
 require_once __DIR__ . "/include/broadlink.class.php";
+require_once __DIR__ . "../..//device/Broadlink_sp2/Broadlink_sp2.php";
 
+//$d = Broadlink::CreateDevice("192.168.1.1", "121231231", 1);
+//var_dump($d);
 
-
+die();
 
 $devs = Broadlink::Discover();
 
-/*$aes = new Crypt_AES();
-$aes->setKey('abcdefghijklmnop');
-$size = 10 * 1024;
-$plaintext = '';
-for ($i = 0; $i < $size; $i++) {
- $plaintext.= 'a';
-}
-
-echo $aes->decrypt($aes->encrypt($plaintext));
-die();
-*/
 //var_dump($devs);
 
 var_dump($devs[0]->mac());
