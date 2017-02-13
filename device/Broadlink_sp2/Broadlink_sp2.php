@@ -20,8 +20,11 @@ class Broadlink_sp2 extends Broadlink
 
 		foreach ($devs as $dev)
 		{
-			$dev->Auth();
-			$ret[] = $dev;
+			if (get_class($dev) == get_class())
+			{
+				$dev->Auth();
+				$ret[] = $dev;
+			}
 		}
 
 		return $ret;
@@ -48,8 +51,6 @@ class Broadlink_sp2 extends Broadlink
 	{
 		return true;
 	}
-
-	public function getVersion() { return "0.0.1"; }
 
 
 
@@ -83,23 +84,8 @@ class Broadlink_sp2 extends Broadlink
         }
 
         return false;
-
         
     }
+
+    public function getVersion() { return "0.0.1"; }
 }
-
-
-/*
-
-	$devs = Broadlink::Discover();
-
-	//var_dump($devs);
-
-	var_dump($devs[0]->mac());
-
-	var_dump($devs[0]->Auth());
-	var_dump($devs[0]->Set_Power(1));
-	var_dump($devs[0]->Check_Power());
-
-
-*/
