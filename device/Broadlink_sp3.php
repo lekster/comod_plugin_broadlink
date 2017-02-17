@@ -1,9 +1,9 @@
 <?php
 
 require_once (PROJ_DIR . "/htdocs/console/controllers/AbstractDevice.php");
-require_once (__DIR__ . "/../../src/include/broadlink.class.php");
+require_once (__DIR__ . "/../src/include/broadlink.class.php");
 
-class Broadlink_sp3 extends AbstractDevice
+class Broadlink_sp3 extends Broadlink
 {
 	
 	public function discovery()
