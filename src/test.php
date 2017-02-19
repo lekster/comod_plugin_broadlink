@@ -1,27 +1,50 @@
 <?php
 
-define("PROJ_DIR", "/home/asmirnov/workspace/pbr-wifc-asm-test/");
+//define("PROJ_DIR", "/home/asmirnov/workspace/pbr-wifc-asm-test/");
+define("PROJ_DIR","/home/projects/php/projects/devel/md/");
 
 require_once __DIR__ . "/include/broadlink.class.php";
-require_once __DIR__ . "../..//device/Broadlink_sp2/Broadlink_sp2.php";
+require_once __DIR__ . "../..//device/Broadlink_sp2.php";
 
 //$d = Broadlink::CreateDevice("192.168.1.1", "121231231", 1);
 //var_dump($d);
 
-die();
+
 
 $devs = Broadlink::Discover();
 
 //var_dump($devs);
+foreach ($devs as $dev) {
+	echo ($dev->mac() . PHP_EOL);
+	$dev->Auth();
+}
 
-var_dump($devs[0]->mac());
+var_dump($devs[0]->getMacAddress());
 
-var_dump($devs[0]->Auth());
+
+//var_dump($devs[0]->Auth());
+
 var_dump($devs[0]->Set_Power(1));
 var_dump($devs[0]->Check_Power());
 sleep(2);
 var_dump($devs[0]->Set_Power(0));
 var_dump($devs[0]->Check_Power());
+var_dump($devs[0]->getOptions());
+
+sleep(1);
+$devs[0]->setOptions($devs[0]->getOptions());
+
+var_dump($devs[0]->Set_Power(1));
+var_dump($devs[0]->Check_Power());
+sleep(2);
+var_dump($devs[0]->Set_Power(0));
+
+var_dump($devs[1]->Set_Power(1));
+var_dump($devs[1]->Check_Power());
+sleep(2);
+var_dump($devs[1]->Set_Power(0));
+
+
 die();
 
 

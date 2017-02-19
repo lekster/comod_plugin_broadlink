@@ -9,7 +9,7 @@ class Broadlink_sp3 extends Broadlink
 	public function discovery()
 	{
 		//возвращать mac адреса
-		$ret = ['123'];
+		$ret = [];
 		
 		return $ret;
 	}

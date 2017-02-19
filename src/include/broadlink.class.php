@@ -1,4 +1,4 @@
-<?
+<?php
 
 require_once __DIR__ . "/../phpcrypt/phpCrypt.php";
 use PHP_Crypt\PHP_Crypt as PHP_Crypt;
@@ -40,7 +40,7 @@ abstract class Broadlink extends AbstractDevice {
     public function __construct($address=null)
     {
         parent::__construct($address);
-
+        $this->mac = array_map(function ($x) { return hexdec($x); } , explode(":", $address) );
         $this->count = rand(0, 0xffff);
     }
 
@@ -75,6 +75,8 @@ abstract class Broadlink extends AbstractDevice {
     
     public static function CreateDevice($host, $mac, $deviceType)
     {
+        $devTypeInt = self::getdevtype($deviceType);
+
         $dc = get_declared_classes();
         $classNameLower = strtolower(get_class());
         $bc = array_values(array_filter($dc, function ($x) use($classNameLower) { return preg_match("/$classNameLower/i", $x); } ));
@@ -83,7 +85,7 @@ abstract class Broadlink extends AbstractDevice {
             $reflector = new ReflectionClass($className);
             if ($reflector->isSubclassOf(get_class()))
             {
-                if ($reflector->getConstant("DEVICE_TYPE") == $deviceType)
+                if ($reflector->getConstant("DEVICE_TYPE") == $devTypeInt)
                 {
                     $ret = new $className($mac);
                     $ret->setOptions(['host' => $host]);
@@ -303,7 +305,6 @@ abstract class Broadlink extends AbstractDevice {
 
 			$responsepacket = self::byte2array($response);
 
-
 			$devtype = hexdec(sprintf("%x%x", $responsepacket[0x35], $responsepacket[0x34]));
 			$host_array = array_slice($responsepacket, 0x36, 4);
 			$mac = array_slice($responsepacket, 0x3a, 6);
@@ -313,7 +314,11 @@ abstract class Broadlink extends AbstractDevice {
 			}
 
 			$host = substr($host, 0, strlen($host) - 1);
-			$device = Broadlink::CreateDevice($host, $mac, $devtype);
+			//var_dump($mac);
+            $mac = implode(array_map(function ($x) {return sprintf("%02x", $x); }, $mac ), ":");
+            //var_dump($mac);
+            //var_dump( array_map(function ($x) { return hexdec($x); } , explode(":", $mac) ));
+            $device = Broadlink::CreateDevice($host, $mac, $devtype);
 
 			if($device != NULL)
             {
@@ -477,22 +482,22 @@ abstract class Broadlink extends AbstractDevice {
     public function setOptions(array $opt)
     {
         $this->_options = $opt;
-        $this->id = $this->_options['id'];
-        $this->host = $this->_options['host'];
-        $this->key = $this->_options['key'];
+        $this->id = (isset($this->_options['id'])) ? array_map("hexdec", explode(":", @$this->_options['id'])) : $this->id;
+        $this->host = (isset($this->_options['host'])) ? $this->_options['host'] : $this->host;
+        $this->key = (isset($this->_options['key'])) ? array_map("hexdec", explode(":", @$this->_options['key'])) : $this->key;
     }
 
     public function getOptions()
     {
-        $this->_options['id'] = $this->id;
+        $this->_options['id'] =  implode(array_map(function ($x) {return sprintf("%02x", $x); }, $this->id)  , ":");
         $this->_options['host'] = $this->host;
-        $this->_options['key'] = $this->key;
+        $this->_options['key'] = implode(array_map(function ($x) {return sprintf("%02x", $x); }, $this->key)  , ":");;
         return $this->_options;
     }
 
     public function getMacAddress()
     {
-        return $this->mac();
+        return $this->_addr;
     }
 
 
