@@ -1,6 +1,6 @@
 {
     "name": "Broadlink",
-    "type": "device",
+    "type": "plugin",
     "description": "Twig, the flexible, fast, and secure template language for PHP",
     "version":"0.0.5",
     "keywords": ["comod", "plugin"],
