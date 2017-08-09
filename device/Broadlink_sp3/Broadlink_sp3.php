@@ -38,5 +38,9 @@ class Broadlink_sp3 extends AbstractDevice
 	}
 
 	public function getVersion() { return "0.0.1"; }
+	
+	public function getMacAddress() {}
+	public function setOptions(array $opt) {}
+	public function getOptions() {}
 
 }
