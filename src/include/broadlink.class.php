@@ -3,7 +3,7 @@
 require_once __DIR__ . "/../phpcrypt/phpCrypt.php";
 use PHP_Crypt\PHP_Crypt as PHP_Crypt;
 
-require_once (PROJ_DIR . "/htdocs/console/controllers/AbstractDevice.php");
+use console\controllers\AbstractDevice;
 
 
 function aes128_cbc_encrypt($key, $data, $iv) {
