@@ -9,9 +9,9 @@ class Broadlink_sp3 extends AbstractDevice
 	public function discovery()
 	{
 		//возвращать mac адреса
-		$ret = ['123'];
+		//$ret = ['123'];
 		
-		return $ret;
+		//return $ret;
 	}
 	
 	public function getPortsConf()
