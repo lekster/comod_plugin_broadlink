@@ -3,16 +3,8 @@
 use console\controllers\AbstractDevice;
 require_once (__DIR__ . "/../../src/include/broadlink.class.php");
 
-class Broadlink_sp3 extends AbstractDevice
+class Broadlink_sp3 extends Broadlink
 {
-	
-	public function discovery()
-	{
-		//возвращать mac адреса
-		//$ret = ['123'];
-		
-		//return $ret;
-	}
 	
 	public function getPortsConf()
 	{
@@ -37,9 +29,8 @@ class Broadlink_sp3 extends AbstractDevice
 		return true;
 	}
 
+	public function init() {}
 	public function getVersion() { return "0.0.1"; }
-	
-	public function getMacAddress() {}
 	public function setOptions(array $opt) {}
 	public function getOptions() {}
 

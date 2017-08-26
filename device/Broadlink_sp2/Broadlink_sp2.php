@@ -5,34 +5,15 @@ require_once (__DIR__ . "/../../src/include/broadlink.class.php");
 
 class Broadlink_sp2 extends Broadlink
 {
-	const DEVICE_TYPE = 1;
+	const DEVICE_TYPE = [1, 0x2728];
 
-	public function __construct($address=null)
-    {
-        parent::__construct($address);
-    }
-
-	public function discovery()
-	{
-		//возвращать mac адреса
-		$devs = Broadlink::Discover();
-		$ret = [];
-
-		foreach ($devs as $dev)
-		{
-			$dev->Auth();
-			$ret[] = $dev;
-		}
-
-		return $ret;
-	}
-	
 	public function getPortsConf()
 	{
 		return array(
 			'p0' => ['AccessType' => 'RW', 'PortReal' => 'power0'],
 		);
 	}
+	public function init() {}
 
 	protected function setPortValTempl($port, $val)
 	{
@@ -59,7 +40,7 @@ class Broadlink_sp2 extends Broadlink
         $packet[0] = 0x02;
         $packet[4] = $state ? 1 : 0;
 
-        $this->send_packet(0x6a, $packet);
+        return $this->send_packet(0x6a, $packet);
     }
 
     public function Check_Power(){
@@ -77,12 +58,12 @@ class Broadlink_sp2 extends Broadlink
             if(count($enc_payload) > 0){
 
                 $payload = $this->byte2array(aes128_cbc_decrypt($this->key(), $this->byte($enc_payload), $this->iv()));
-                return $payload[0x4] ? true : false;    
+                return $payload[0x4] ? 1 : 0;    
             }
 
         }
 
-        return false;
+        return null;
 
         
     }

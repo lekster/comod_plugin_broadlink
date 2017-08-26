@@ -1,10 +1,9 @@
-<?
+<?php
 
 require_once __DIR__ . "/../phpcrypt/phpCrypt.php";
 use PHP_Crypt\PHP_Crypt as PHP_Crypt;
 
 use console\controllers\AbstractDevice;
-
 
 function aes128_cbc_encrypt($key, $data, $iv) {
 
@@ -44,6 +43,20 @@ abstract class Broadlink extends AbstractDevice {
         $this->count = rand(0, 0xffff);
     }
 
+    public static function discovery()
+    {
+        //возвращать mac адреса
+        $devs = self::Discover();
+        $ret = [];
+
+        foreach ($devs as $dev)
+        {
+            $dev->Auth();
+            $ret[] = $dev;
+        }
+
+        return $ret;
+    }
 
     /*
     function __construct($h = "", $m = "", $p = 80, $d = null) {
@@ -83,7 +96,7 @@ abstract class Broadlink extends AbstractDevice {
             $reflector = new ReflectionClass($className);
             if ($reflector->isSubclassOf(get_class()))
             {
-                if ($reflector->getConstant("DEVICE_TYPE") == $deviceType)
+                if (@in_array($deviceType, $reflector->getConstant("DEVICE_TYPE")))
                 {
                     $ret = new $className($mac);
                     $ret->setOptions(['host' => $host]);
@@ -313,6 +326,8 @@ abstract class Broadlink extends AbstractDevice {
 			}
 
 			$host = substr($host, 0, strlen($host) - 1);
+
+            //var_dump($host, $mac, $devtype);
 			$device = Broadlink::CreateDevice($host, $mac, $devtype);
 
 			if($device != NULL)
@@ -378,6 +393,7 @@ abstract class Broadlink extends AbstractDevice {
 
 	    $aes = $this->byte2array(aes128_cbc_encrypt($this->key(), $this->byte($payload), $this->iv()));
 
+      
         /*$packetHex = "";
         foreach (array_reverse($payload) as $value) {
             $packetHex = sprintf("%02x", $value) . ':' . $packetHex;
@@ -431,7 +447,6 @@ abstract class Broadlink extends AbstractDevice {
 	    if($cs){
 	    	socket_close($cs);
 	    }
-
 	    return $this->byte2array($response);
 
     }
@@ -477,9 +492,11 @@ abstract class Broadlink extends AbstractDevice {
     public function setOptions(array $opt)
     {
         $this->_options = $opt;
-        $this->id = $this->_options['id'];
+        if (isset($this->_options['id']))
+            $this->id = $this->_options['id'];
         $this->host = $this->_options['host'];
-        $this->key = $this->_options['key'];
+        if (isset($this->_options['key']))
+            $this->key = $this->_options['key'];
     }
 
     public function getOptions()
@@ -490,10 +507,10 @@ abstract class Broadlink extends AbstractDevice {
         return $this->_options;
     }
 
-    public function getMacAddress()
+    /*public function getMacAddress()
     {
         return $this->mac();
-    }
+    }*/
 
 
 }
