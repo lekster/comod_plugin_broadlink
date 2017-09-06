@@ -4,6 +4,7 @@ require_once __DIR__ . "/../phpcrypt/phpCrypt.php";
 use PHP_Crypt\PHP_Crypt as PHP_Crypt;
 
 use console\controllers\AbstractDevice;
+use src\helpers\SysHelper;
 
 function aes128_cbc_encrypt($key, $data, $iv) {
 
@@ -86,8 +87,19 @@ abstract class Broadlink extends AbstractDevice {
 
     
     
-    public static function CreateDevice($host, $mac, $deviceType)
+    protected static function CreateDevice($host, $mac, $deviceType, $className)
     {
+
+        /*
+        $files = SysHelper::glob_recursive(__DIR__ . "/../../device/*.php");
+        //get classes for types
+        foreach ($files as $fileName)
+        {
+            require_once $fileName;
+        }
+
+
+        
         $dc = get_declared_classes();
         $classNameLower = strtolower(get_class());
         $bc = array_values(array_filter($dc, function ($x) use($classNameLower) { return preg_match("/$classNameLower/i", $x); } ));
@@ -102,8 +114,23 @@ abstract class Broadlink extends AbstractDevice {
                     $ret->setOptions(['host' => $host]);
                     return $ret;
                 }
-                //var_dump($reflector->getConstant("DEVICE_TYPE"));
+                //var_dump($reflector);
+                //var_dump($reflector->getConstants());
             }
+        }
+        */
+
+        $reflector = new ReflectionClass($className);
+        if ($reflector->isSubclassOf(get_class()))
+        {
+            if (@in_array($deviceType, $reflector->getConstant("DEVICE_TYPE")))
+            {
+                $ret = new $className($mac);
+                $ret->setOptions(['host' => $host]);
+                return $ret;
+            }
+            //var_dump($reflector);
+            //var_dump($reflector->getConstants());
         }
 
         return NULL;
@@ -328,7 +355,14 @@ abstract class Broadlink extends AbstractDevice {
 			$host = substr($host, 0, strlen($host) - 1);
 
             //var_dump($host, $mac, $devtype);
-			$device = Broadlink::CreateDevice($host, $mac, $devtype);
+			//var_dump($mac);
+            $hexMac = implode(":", (array_map(function($x) {return strtoupper(bin2hex(chr($x)));}, $mac)));
+            //var_dump($hexMac);
+
+            $className = get_called_class();
+            $device = Broadlink::CreateDevice($host, $hexMac, $devtype, $className);
+
+            //var_dump(get_class($device));
 
 			if($device != NULL)
             {
